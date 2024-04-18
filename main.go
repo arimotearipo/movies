@@ -20,7 +20,7 @@ import (
 func main() {
 	myEnv, err := godotenv.Read()
 	if err != nil {
-		fmt.Println("No ENV")
+		fmt.Println("No env file")
 		panic(err)
 	}
 
