@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/arimotearipo/movies/internal/service"
@@ -13,12 +12,14 @@ import (
 func GetAllMovies(c *gin.Context) {
 	result, err := service.GetAllMovies()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"movies": result,
+		})
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"movies": result,
-	})
 }
 
 func GetMovieById(c *gin.Context) {
@@ -26,12 +27,14 @@ func GetMovieById(c *gin.Context) {
 
 	result, err := service.GetMovieById(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"movies": result,
+		})
 	}
-
-	c.JSON(200, gin.H{
-		"movies": result,
-	})
 }
 
 func PostMovie(c *gin.Context) {
@@ -42,26 +45,56 @@ func PostMovie(c *gin.Context) {
 		panic(err)
 	}
 
+	// TODO: verify if director_id exists
+
 	err = service.PostMovie(&m)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Data updated",
+		})
+	}
+}
+
+func UpdateMovie(c *gin.Context) {
+	id := c.Params[0].Value
+
+	var m types.MovieParams
+	err := c.ShouldBind(&m)
+	if err != nil {
+		panic(err)
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Data updated",
-	})
+	// TODO: verify if director_id exists
+
+	err = service.UpdateMovie(id, &m)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Successfully updated",
+		})
+	}
+
 }
 
 // directors
 func GetAllDirectors(c *gin.Context) {
 	result, err := service.GetAllDirectors()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"data": result,
+		})
 	}
-
-	c.JSON(200, gin.H{
-		"data": result,
-	})
 }
 
 func GetDirectorById(c *gin.Context) {
@@ -69,12 +102,14 @@ func GetDirectorById(c *gin.Context) {
 
 	result, err := service.GetDirectorById(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"data": result,
+		})
 	}
-
-	c.JSON(200, gin.H{
-		"data": result,
-	})
 }
 
 func PostDirector(c *gin.Context) {
@@ -85,13 +120,36 @@ func PostDirector(c *gin.Context) {
 		panic(err)
 	}
 
-	fmt.Println(d)
 	err = service.PostDirector(&d)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Data updated",
+		})
+	}
+}
+
+func UpdateDirector(c *gin.Context) {
+	id := c.Params[0].Value
+	var d types.DirectorParams
+
+	err := c.ShouldBind(&d)
+	if err != nil {
+		panic(err)
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Data updated",
-	})
+	err = service.UpdateDirector(id, &d)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Successfully updated",
+		})
+	}
+
 }

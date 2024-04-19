@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,12 +19,11 @@ import (
 func main() {
 	myEnv, err := godotenv.Read()
 	if err != nil {
-		fmt.Println("No env file")
-		panic(err)
+		log.Fatal(err)
 	}
 
 	database.InitDatabase(myEnv)
-	defer database.DB.Close()
+	defer database.CloseDB()
 
 	router := gin.Default()
 
@@ -34,6 +32,7 @@ func main() {
 		v1.GET("/", handlers.GetAllMovies)
 		v1.GET("/:id", handlers.GetMovieById)
 		v1.POST("/", handlers.PostMovie)
+		v1.PUT("/:id", handlers.UpdateMovie)
 	}
 
 	v2 := router.Group("/directors")
@@ -41,6 +40,7 @@ func main() {
 		v2.GET("/", handlers.GetAllDirectors)
 		v2.GET("/:id", handlers.GetDirectorById)
 		v2.POST("/", handlers.PostDirector)
+		v2.PUT("/:id", handlers.UpdateDirector)
 	}
 
 	srv := &http.Server{

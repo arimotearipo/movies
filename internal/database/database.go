@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -17,8 +18,23 @@ func InitDatabase(myEnv map[string]string) {
 	var err error
 	DB, err = sqlx.Connect("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error connecting to database:", err)
 	}
 
-	fmt.Println("Connected to database!")
+	log.Println("Connected to database")
+}
+
+func CloseDB() error {
+	if DB == nil {
+		log.Print("Database doesn't exist")
+		return nil
+	}
+
+	err := DB.Close()
+	if err != nil {
+		log.Print("Error closing database connection", err)
+		return err
+	}
+	log.Println("Connection to database closed")
+	return nil
 }

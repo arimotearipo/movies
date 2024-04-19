@@ -1,6 +1,9 @@
 package service
 
 import (
+	"errors"
+	"log"
+
 	"github.com/arimotearipo/movies/internal/database"
 	"github.com/arimotearipo/movies/internal/types"
 )
@@ -48,6 +51,25 @@ func PostMovie(m *types.MovieParams) error {
 	return nil
 }
 
+func UpdateMovie(id string, m *types.MovieParams) error {
+	queryString := `---sql
+	UPDATE movies
+	SET title = $2, director_id = $3, year = $4
+	WHERE movie_id = $1;
+	`
+	rowsAffected, err := database.DB.Exec(queryString, id, m.Title, m.DirectorID, m.Year)
+	if err != nil {
+		return err
+	}
+
+	n, err := rowsAffected.RowsAffected()
+	if err != nil || n == 0 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
 // directors
 func GetAllDirectors() ([]types.Director, error) {
 	queryString := `---sql
@@ -83,6 +105,27 @@ func PostDirector(d *types.DirectorParams) error {
 	_, err := database.DB.Exec(queryString, d.Name, d.DOB, d.Gender, d.Nationality)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func UpdateDirector(id string, d *types.DirectorParams) error {
+	queryString := `---sql
+	UPDATE directors
+	SET name = $2, date_of_birth = $3, gender = $4, nationality = $5
+	WHERE director_id = $1;
+	`
+
+	rowsAffected, err := database.DB.Exec(queryString, id, d.Name, d.DOB, d.Gender, d.Nationality)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	n, err := rowsAffected.RowsAffected()
+	if err != nil || n == 0 {
+		return errors.New("no rows affected")
 	}
 
 	return nil
