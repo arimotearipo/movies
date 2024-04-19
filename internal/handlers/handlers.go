@@ -46,6 +46,13 @@ func PostMovie(c *gin.Context) {
 	}
 
 	// TODO: verify if director_id exists
+	_, err = service.GetDirectorById(m.DirectorID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	err = service.PostMovie(&m)
 	if err != nil {
@@ -69,6 +76,13 @@ func UpdateMovie(c *gin.Context) {
 	}
 
 	// TODO: verify if director_id exists
+	_, err = service.GetDirectorById(m.DirectorID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	err = service.UpdateMovie(id, &m)
 	if err != nil {

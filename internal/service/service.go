@@ -34,6 +34,10 @@ func GetMovieById(id string) ([]types.Movie, error) {
 		return []types.Movie{}, err
 	}
 
+	if len(result) == 0 {
+		return []types.Movie{}, errors.New("movie_id not found")
+	}
+
 	return result, nil
 }
 
@@ -92,6 +96,10 @@ func GetDirectorById(id string) ([]types.Director, error) {
 	err := database.DB.Select(&result, queryString, id)
 	if err != nil {
 		return []types.Director{}, err
+	}
+
+	if len(result) == 0 {
+		return []types.Director{}, errors.New("director_id not found")
 	}
 
 	return result, nil
