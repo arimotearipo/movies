@@ -4,19 +4,35 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/arimotearipo/movies/internal/types"
 	"github.com/jmoiron/sqlx"
 )
 
-var DB *sqlx.DB
+type Database struct {
+	DB  *sqlx.DB
+	cfg types.DBConfig
+}
 
-func InitDatabase(myEnv map[string]string) {
+func NewDatabase(cfg types.DBConfig) *Database {
+	return &Database{
+		nil, cfg,
+	}
+}
+
+func (db *Database) ConnectDB() {
 	// Form connection string
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		myEnv["DB_HOST"], myEnv["DB_PORT"], myEnv["DB_USER"], myEnv["DB_PASSWORD"], myEnv["DB_NAME"])
+	psqlInfo := fmt.Sprintf(
+		"host=%s port=%s user=%s "+
+			"password=%s dbname=%s sslmode=disable",
+		db.cfg.Host,
+		db.cfg.Port,
+		db.cfg.User,
+		db.cfg.Password,
+		db.cfg.DBName,
+	)
 
 	var err error
-	DB, err = sqlx.Connect("postgres", psqlInfo)
+	db.DB, err = sqlx.Connect("postgres", psqlInfo)
 	if err != nil {
 		log.Fatal("Error connecting to database:", err)
 	}
@@ -24,13 +40,13 @@ func InitDatabase(myEnv map[string]string) {
 	log.Println("Connected to database")
 }
 
-func CloseDB() error {
-	if DB == nil {
+func (db *Database) CloseDB() error {
+	if db.DB == nil {
 		log.Print("Database doesn't exist")
 		return nil
 	}
 
-	err := DB.Close()
+	err := db.DB.Close()
 	if err != nil {
 		log.Print("Error closing database connection", err)
 		return err

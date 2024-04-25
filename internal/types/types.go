@@ -27,3 +27,11 @@ type Director struct {
 	Gender      string `db:"gender"`
 	Nationality string `db:"nationality"`
 }
+
+type DBConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DBName   string
+}

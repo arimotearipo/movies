@@ -3,14 +3,34 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/arimotearipo/movies/internal/service"
+	"github.com/arimotearipo/movies/internal/psqlstorage"
 	"github.com/arimotearipo/movies/internal/types"
 	"github.com/gin-gonic/gin"
 )
 
+type Handler struct {
+	storage *psqlstorage.Storage
+}
+
+type HandlerFuncs interface {
+	GetAllMovies(*gin.Context)
+	GetMovieById(*gin.Context)
+	PostMovie(*gin.Context)
+	UpdateMovie(*gin.Context)
+
+	GetAllDirectors(*gin.Context)
+	GetDirectorById(*gin.Context)
+	PostDirector(*gin.Context)
+	UpdateDirector(*gin.Context)
+}
+
+func NewHandler(s *psqlstorage.Storage) *Handler {
+	return &Handler{s}
+}
+
 // movies
-func GetAllMovies(c *gin.Context) {
-	result, err := service.GetAllMovies()
+func (h *Handler) GetAllMovies(c *gin.Context) {
+	result, err := h.storage.GetAllMovies()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -22,10 +42,10 @@ func GetAllMovies(c *gin.Context) {
 	}
 }
 
-func GetMovieById(c *gin.Context) {
+func (h *Handler) GetMovieById(c *gin.Context) {
 	id := c.Params[0].Value
 
-	result, err := service.GetMovieById(id)
+	result, err := h.storage.GetMovieById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -37,7 +57,7 @@ func GetMovieById(c *gin.Context) {
 	}
 }
 
-func PostMovie(c *gin.Context) {
+func (h *Handler) PostMovie(c *gin.Context) {
 	var m types.MovieParams
 
 	err := c.ShouldBind(&m)
@@ -46,7 +66,7 @@ func PostMovie(c *gin.Context) {
 	}
 
 	// TODO: verify if director_id exists
-	_, err = service.GetDirectorById(m.DirectorID)
+	_, err = h.storage.GetDirectorById(m.DirectorID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -54,7 +74,7 @@ func PostMovie(c *gin.Context) {
 		return
 	}
 
-	err = service.PostMovie(&m)
+	err = h.storage.PostMovie(&m)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -66,7 +86,7 @@ func PostMovie(c *gin.Context) {
 	}
 }
 
-func UpdateMovie(c *gin.Context) {
+func (h *Handler) UpdateMovie(c *gin.Context) {
 	id := c.Params[0].Value
 
 	var m types.MovieParams
@@ -76,7 +96,7 @@ func UpdateMovie(c *gin.Context) {
 	}
 
 	// TODO: verify if director_id exists
-	_, err = service.GetDirectorById(m.DirectorID)
+	_, err = h.storage.GetDirectorById(m.DirectorID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -84,7 +104,7 @@ func UpdateMovie(c *gin.Context) {
 		return
 	}
 
-	err = service.UpdateMovie(id, &m)
+	err = h.storage.UpdateMovie(id, &m)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -97,9 +117,9 @@ func UpdateMovie(c *gin.Context) {
 
 }
 
-// directors
-func GetAllDirectors(c *gin.Context) {
-	result, err := service.GetAllDirectors()
+// // directors
+func (h *Handler) GetAllDirectors(c *gin.Context) {
+	result, err := h.storage.GetAllDirectors()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -111,10 +131,10 @@ func GetAllDirectors(c *gin.Context) {
 	}
 }
 
-func GetDirectorById(c *gin.Context) {
+func (h *Handler) GetDirectorById(c *gin.Context) {
 	id := c.Params[0].Value
 
-	result, err := service.GetDirectorById(id)
+	result, err := h.storage.GetDirectorById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -126,7 +146,7 @@ func GetDirectorById(c *gin.Context) {
 	}
 }
 
-func PostDirector(c *gin.Context) {
+func (h *Handler) PostDirector(c *gin.Context) {
 	var d types.DirectorParams
 
 	err := c.ShouldBind(&d)
@@ -134,7 +154,7 @@ func PostDirector(c *gin.Context) {
 		panic(err)
 	}
 
-	err = service.PostDirector(&d)
+	err = h.storage.PostDirector(&d)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -146,7 +166,7 @@ func PostDirector(c *gin.Context) {
 	}
 }
 
-func UpdateDirector(c *gin.Context) {
+func (h *Handler) UpdateDirector(c *gin.Context) {
 	id := c.Params[0].Value
 	var d types.DirectorParams
 
@@ -155,7 +175,7 @@ func UpdateDirector(c *gin.Context) {
 		panic(err)
 	}
 
-	err = service.UpdateDirector(id, &d)
+	err = h.storage.UpdateDirector(id, &d)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
