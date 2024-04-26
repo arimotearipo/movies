@@ -32,6 +32,6 @@ func main() {
 
 	store := psqlstorage.NewStorage(db.DB)
 
-	server := server.NewServer("localhost:8080", store)
+	server := server.NewServer("localhost:"+myEnv["PORT"], store)
 	server.Serve()
 }
