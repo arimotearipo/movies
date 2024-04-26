@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/arimotearipo/movies/internal/database"
@@ -12,6 +13,13 @@ import (
 )
 
 func main() {
+	createTable := flag.Bool(
+		"createtable",
+		false,
+		"Set to true if your database is currently empty and you want this programme to create the tables for you",
+	)
+	flag.Parse()
+
 	myEnv, err := godotenv.Read()
 	if err != nil {
 		log.Fatal(err)
@@ -27,6 +35,10 @@ func main() {
 
 	db := database.NewDatabase(dbConfig)
 	db.ConnectDB()
+
+	if *createTable {
+		db.CreateSchemas()
+	}
 
 	defer db.CloseDB()
 

@@ -35,3 +35,8 @@ type DBConfig struct {
 	Password string
 	DBName   string
 }
+
+type SchemaExists struct {
+	T1 bool `db:"table1_exists"`
+	T2 bool `db:"table2_exists"`
+}
