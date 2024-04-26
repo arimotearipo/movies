@@ -1,6 +1,8 @@
 package server
 
 import (
+	"log"
+
 	"github.com/arimotearipo/movies/internal/handlers"
 	"github.com/arimotearipo/movies/internal/psqlstorage"
 	"github.com/gin-gonic/gin"
@@ -20,12 +22,15 @@ func (s *Server) Serve() {
 
 	handler := handlers.NewHandler(s.store)
 
+	router.GET("/healthcheck", handler.HealthCheck)
+
 	v1 := router.Group("/movies")
 	{
 		v1.GET("/", handler.GetAllMovies)
 		v1.GET("/:id", handler.GetMovieById)
 		v1.POST("/", handler.PostMovie)
 		v1.PUT("/:id", handler.UpdateMovie)
+		v1.DELETE("/:id", handler.DeleteMovie)
 	}
 
 	v2 := router.Group("/directors")
@@ -34,10 +39,12 @@ func (s *Server) Serve() {
 		v2.GET("/:id", handler.GetDirectorById)
 		v2.POST("/", handler.PostDirector)
 		v2.PUT("/:id", handler.UpdateDirector)
+		v2.DELETE("/:id", handler.DeleteDirector)
 	}
 
 	err := router.Run(s.addr)
 	if err != nil {
+		log.Println(err)
 		panic(err)
 	}
 }

@@ -18,12 +18,14 @@ type StorageService interface {
 	GetMovieById(string) ([]types.Movie, error)
 	PostMovie(*types.MovieParams) error
 	UpdateMovie(string, *types.MovieParams) error
+	DeleteMovie(string) error
 
 	// directors
 	GetAllDirectors() ([]types.Director, error)
 	GetDirectorById(string) ([]types.Director, error)
 	PostDirector(*types.DirectorParams) error
 	UpdateDirector(string, *types.DirectorParams) error
+	DeleteDirector(string) error
 }
 
 func NewStorage(db *sqlx.DB) *Storage {
@@ -85,11 +87,36 @@ func (s *Storage) UpdateMovie(id string, m *types.MovieParams) error {
 	`
 	rowsAffected, err := s.db.Exec(queryString, id, m.Title, m.DirectorID, m.Year)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
 	n, err := rowsAffected.RowsAffected()
 	if err != nil || n == 0 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (s *Storage) DeleteMovie(id string) error {
+	queryString := `---sql
+	DELETE FROM movies
+	WHERE movie_id = $1;
+	`
+
+	rowsAffected, err := s.db.Exec(queryString, id)
+	if err != nil {
+		return err
+	}
+
+	n, err := rowsAffected.RowsAffected()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	if n == 0 {
 		return errors.New("no rows affected")
 	}
 
@@ -134,6 +161,7 @@ func (s *Storage) PostDirector(d *types.DirectorParams) error {
 
 	_, err := s.db.Exec(queryString, d.Name, d.DOB, d.Gender, d.Nationality)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -156,6 +184,42 @@ func (s *Storage) UpdateDirector(id string, d *types.DirectorParams) error {
 	n, err := rowsAffected.RowsAffected()
 	if err != nil || n == 0 {
 		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (s *Storage) DeleteDirector(id string) error {
+	queryString := `---sql
+	DELETE FROM directors
+	WHERE director_id = $1;
+	`
+
+	rowsAffected, err := s.db.Exec(queryString, id)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	n, err := rowsAffected.RowsAffected()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	if n == 0 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+// healtcheck
+func (s *Storage) HealthCheck() error {
+	err := s.db.Ping()
+	if err != nil {
+		log.Println(err)
+		return err
 	}
 
 	return nil

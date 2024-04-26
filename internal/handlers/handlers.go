@@ -17,11 +17,15 @@ type HandlerFuncs interface {
 	GetMovieById(*gin.Context)
 	PostMovie(*gin.Context)
 	UpdateMovie(*gin.Context)
+	DeleteMovie(*gin.Context)
 
 	GetAllDirectors(*gin.Context)
 	GetDirectorById(*gin.Context)
 	PostDirector(*gin.Context)
 	UpdateDirector(*gin.Context)
+	DeleteDirector(*gin.Context)
+
+	HealthCheck(*gin.Context)
 }
 
 func NewHandler(s *psqlstorage.Storage) *Handler {
@@ -87,7 +91,7 @@ func (h *Handler) PostMovie(c *gin.Context) {
 }
 
 func (h *Handler) UpdateMovie(c *gin.Context) {
-	id := c.Params[0].Value
+	movieId := c.Params[0].Value
 
 	var m types.MovieParams
 	err := c.ShouldBind(&m)
@@ -95,7 +99,8 @@ func (h *Handler) UpdateMovie(c *gin.Context) {
 		panic(err)
 	}
 
-	// TODO: verify if director_id exists
+	// TODO: verify if movie_id exists
+
 	_, err = h.storage.GetDirectorById(m.DirectorID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -104,7 +109,7 @@ func (h *Handler) UpdateMovie(c *gin.Context) {
 		return
 	}
 
-	err = h.storage.UpdateMovie(id, &m)
+	err = h.storage.UpdateMovie(movieId, &m)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -117,7 +122,23 @@ func (h *Handler) UpdateMovie(c *gin.Context) {
 
 }
 
-// // directors
+func (h *Handler) DeleteMovie(c *gin.Context) {
+	movieId := c.Params[0].Value
+
+	err := h.storage.DeleteMovie(movieId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Successfully deleted",
+		})
+	}
+
+}
+
+// directors
 func (h *Handler) GetAllDirectors(c *gin.Context) {
 	result, err := h.storage.GetAllDirectors()
 	if err != nil {
@@ -186,4 +207,34 @@ func (h *Handler) UpdateDirector(c *gin.Context) {
 		})
 	}
 
+}
+
+func (h *Handler) DeleteDirector(c *gin.Context) {
+	directorId := c.Params[0].Value
+
+	err := h.storage.DeleteDirector(directorId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Sucessfully deleted",
+		})
+	}
+}
+
+// healthcheck
+func (h *Handler) HealthCheck(c *gin.Context) {
+	err := h.storage.HealthCheck()
+
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "connection healthy",
+		})
+	}
 }
