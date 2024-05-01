@@ -2,13 +2,10 @@ package main
 
 import (
 	"flag"
-	"log"
 
 	"github.com/arimotearipo/movies/internal/database"
 	"github.com/arimotearipo/movies/internal/psqlstorage"
 	"github.com/arimotearipo/movies/internal/server"
-	"github.com/arimotearipo/movies/internal/types"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -20,18 +17,7 @@ func main() {
 	)
 	flag.Parse()
 
-	myEnv, err := godotenv.Read()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dbConfig := types.DBConfig{
-		Host:     myEnv["DB_HOST"],
-		Port:     myEnv["DB_PORT"],
-		User:     myEnv["DB_USER"],
-		Password: myEnv["DB_PASSWORD"],
-		DBName:   myEnv["DB_NAME"],
-	}
+	dbConfig := initConfig()
 
 	db := database.NewDatabase(dbConfig)
 	db.ConnectDB()
@@ -44,6 +30,7 @@ func main() {
 
 	store := psqlstorage.NewStorage(db.DB)
 
-	server := server.NewServer("localhost:"+myEnv["PORT"], store)
+	port := getEnv("PORT", "8080")
+	server := server.NewServer("localhost:"+port, store)
 	server.Serve()
 }
