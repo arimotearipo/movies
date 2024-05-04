@@ -24,22 +24,22 @@ func (s *Server) Serve() {
 
 	router.GET("/healthcheck", handler.HealthCheck)
 
-	v1 := router.Group("/movies")
+	movies := router.Group("/movies")
 	{
-		v1.GET("/", handler.GetAllMovies)
-		v1.GET("/:id", handler.GetMovieById)
-		v1.POST("/", handler.PostMovie)
-		v1.PUT("/:id", handler.UpdateMovie)
-		v1.DELETE("/:id", handler.DeleteMovie)
+		movies.GET("/", handler.GetAllMovies)
+		movies.GET("/:id", handler.GetMovieById)
+		movies.POST("/", handler.PostMovie)
+		movies.PUT("/:id", handler.UpdateMovie)
+		movies.DELETE("/:id", handler.DeleteMovie)
 	}
 
-	v2 := router.Group("/directors")
+	directors := router.Group("/directors")
 	{
-		v2.GET("/", handler.GetAllDirectors)
-		v2.GET("/:id", handler.GetDirectorById)
-		v2.POST("/", handler.PostDirector)
-		v2.PUT("/:id", handler.UpdateDirector)
-		v2.DELETE("/:id", handler.DeleteDirector)
+		directors.GET("/", handler.GetAllDirectors)
+		directors.GET("/:id", handler.GetDirectorById)
+		directors.POST("/", handler.PostDirector)
+		directors.PUT("/:id", handler.UpdateDirector)
+		directors.DELETE("/:id", handler.DeleteDirector)
 	}
 
 	err := router.Run(s.addr)
