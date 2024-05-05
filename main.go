@@ -1,7 +1,8 @@
 package main
 
 import (
-	"flag"
+	"encoding/json"
+	"fmt"
 
 	"github.com/arimotearipo/movies/internal/database"
 	"github.com/arimotearipo/movies/internal/psqlstorage"
@@ -10,27 +11,23 @@ import (
 )
 
 func main() {
-	createTable := flag.Bool(
-		"createtable",
-		false,
-		"Set to true if your database is currently empty and you want this programme to create the tables for you",
-	)
-	flag.Parse()
 
 	dbConfig := initConfig()
+
+	configJson, _ := json.MarshalIndent(dbConfig, "", "\t")
+
+	fmt.Println("dbConfig", string(configJson))
 
 	db := database.NewDatabase(dbConfig)
 	db.ConnectDB()
 
-	if *createTable {
-		db.CreateSchemas()
-	}
+	db.CreateSchemas()
 
 	defer db.CloseDB()
 
 	store := psqlstorage.NewStorage(db.DB)
 
 	port := getEnv("PORT", "8080")
-	server := server.NewServer("localhost:"+port, store)
+	server := server.NewServer(":"+port, store)
 	server.Serve()
 }

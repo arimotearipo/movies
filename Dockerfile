@@ -1,15 +1,12 @@
 #build stage
 FROM golang:alpine AS builder
-RUN apk add --no-cache git
-WORKDIR /go/src/app
+WORKDIR /movie_app
 COPY . .
-RUN go get -d -v ./...
-RUN go build -o /go/bin/app -v ./...
+RUN go build -o movie_app
 
 #final stage
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-COPY --from=builder /go/bin/app /app
-ENTRYPOINT /app
+COPY --from=builder /movie_app/movie_app .
+ENTRYPOINT ./movie_app
 LABEL Name=movies Version=0.0.1
 EXPOSE 8080

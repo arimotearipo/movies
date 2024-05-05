@@ -60,8 +60,11 @@ func (db *Database) CreateSchemas() {
 
 	exists := db.checkSchemaExists()
 	if exists {
-		log.Fatal("Schemas already exists")
+		log.Println("Schemas already exists")
+		return
 	}
+
+	log.Println("Couldn't find existing schemas. Creating schema...")
 
 	queryString := `---sql
 		CREATE TABLE directors (
