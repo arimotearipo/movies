@@ -7,10 +7,10 @@ type MovieParams struct {
 }
 
 type Movie struct {
-	MovieID    string `db:"movie_id"`
-	Title      string `db:"title"`
-	DirectorID string `db:"director_id"`
-	Year       string `db:"year"`
+	MovieID    		string `db:"movie_id"`
+	Title      		string `db:"title"`
+	DirectorName 	string `db:"director_name"`
+	Year       		string `db:"year"`
 }
 
 type DirectorParams struct {

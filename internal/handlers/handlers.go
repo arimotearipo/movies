@@ -62,7 +62,7 @@ func (h *Handler) GetMovieById(c *gin.Context) {
 }
 
 func (h *Handler) PostMovie(c *gin.Context) {
-	var m types.MovieParams
+	var m []types.MovieParams
 
 	err := c.ShouldBind(&m)
 	if err != nil {
@@ -70,12 +70,15 @@ func (h *Handler) PostMovie(c *gin.Context) {
 	}
 
 	// TODO: verify if director_id exists
-	_, err = h.storage.GetDirectorById(m.DirectorID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
+	for _, director := range m {
+		_, err = h.storage.GetDirectorById(director.DirectorID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+				"DirectorID": director.DirectorID,
+			})
+			return
+		}
 	}
 
 	err = h.storage.PostMovie(&m)
@@ -168,7 +171,7 @@ func (h *Handler) GetDirectorById(c *gin.Context) {
 }
 
 func (h *Handler) PostDirector(c *gin.Context) {
-	var d types.DirectorParams
+	var d []types.DirectorParams
 
 	err := c.ShouldBind(&d)
 	if err != nil {

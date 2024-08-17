@@ -35,7 +35,9 @@ func NewStorage(db *sqlx.DB) *Storage {
 // movies
 func (s *Storage) GetAllMovies() ([]types.Movie, error) {
 	queryString := `---sql
-	SELECT * FROM movies;
+	SELECT movie_id, title, name as director_name, year FROM movies
+	LEFT JOIN directors
+	ON movies.director_id = directors.director_id;
 	`
 
 	var result []types.Movie
@@ -65,15 +67,17 @@ func (s *Storage) GetMovieById(id string) ([]types.Movie, error) {
 	return result, nil
 }
 
-func (s *Storage) PostMovie(m *types.MovieParams) error {
+func (s *Storage) PostMovie(m *[]types.MovieParams) error {
 	queryString := `---sql
 	INSERT INTO movies (title, director_id, year)
 	VALUES ($1, $2, $3);
 	`
 
-	_, err := s.db.Exec(queryString, m.Title, m.DirectorID, m.Year)
-	if err != nil {
-		return err
+	for _, movie := range *m {
+		_, err := s.db.Exec(queryString, movie.Title, movie.DirectorID, movie.Year)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -154,15 +158,17 @@ func (s *Storage) GetDirectorById(id string) ([]types.Director, error) {
 	return result, nil
 }
 
-func (s *Storage) PostDirector(d *types.DirectorParams) error {
+func (s *Storage) PostDirector(d *[]types.DirectorParams) error {
 	queryString := `---sql
 	INSERT INTO directors (name, date_of_birth, gender, nationality)
 	VALUES ($1, $2, $3, $4);`
 
-	_, err := s.db.Exec(queryString, d.Name, d.DOB, d.Gender, d.Nationality)
-	if err != nil {
-		log.Println(err)
-		return err
+	for _, director := range *d {
+		_, err := s.db.Exec(queryString, director.Name, director.DOB, director.Gender, director.Nationality)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
 	}
 
 	return nil

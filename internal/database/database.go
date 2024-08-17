@@ -6,6 +6,7 @@ import (
 
 	"github.com/arimotearipo/movies/internal/types"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Database struct {
