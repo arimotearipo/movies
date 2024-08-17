@@ -51,7 +51,10 @@ func (s *Storage) GetAllMovies() ([]types.Movie, error) {
 
 func (s *Storage) GetMovieById(id string) ([]types.Movie, error) {
 	queryString := `---sql
-	SELECT * FROM movies WHERE movie_id = $1;
+	SELECT movie_id, title, name AS director_name, year FROM movies
+	LEFT JOIN directors
+	ON movies.director_id = directors.director_id
+	WHERE movie_id = $1;
 	`
 
 	var result []types.Movie
