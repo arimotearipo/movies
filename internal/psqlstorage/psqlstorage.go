@@ -26,10 +26,28 @@ type StorageService interface {
 	PostDirector(*types.DirectorParams) error
 	UpdateDirector(string, *types.DirectorParams) error
 	DeleteDirector(string) error
+
+	HealthCheck() error
 }
 
 func NewStorage(db *sqlx.DB) *Storage {
 	return &Storage{db}
+}
+
+func (s *Storage) GetMovies() ([]types.Movie, error) {
+	queryString := `---sql
+	SELECT movie_id, title, name as director_name, year FROM movies
+	LEFT JOIN directors
+	ON movies.director_id = directors.director_id;
+	`
+
+	var result []types.Movie
+	err := s.db.Select(&result, queryString)
+	if err != nil {
+		return []types.Movie{}, err
+	}
+
+	return result, nil
 }
 
 // movies

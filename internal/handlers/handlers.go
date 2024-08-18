@@ -13,6 +13,8 @@ type Handler struct {
 }
 
 type HandlerFuncs interface {
+	Test()
+
 	GetAllMovies(*gin.Context)
 	GetMovieById(*gin.Context)
 	PostMovie(*gin.Context)
@@ -32,6 +34,19 @@ func NewHandler(s *psqlstorage.Storage) *Handler {
 	return &Handler{s}
 }
 
+func (h *Handler) GetMovies(c *gin.Context) {
+	result, err := h.storage.GetAllMovies()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"data": result,
+		})
+	}
+}
+
 // movies
 func (h *Handler) GetAllMovies(c *gin.Context) {
 	result, err := h.storage.GetAllMovies()
@@ -41,7 +56,7 @@ func (h *Handler) GetAllMovies(c *gin.Context) {
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"movies": result,
+			"data": result,
 		})
 	}
 }
@@ -55,8 +70,8 @@ func (h *Handler) GetMovieById(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(200, gin.H{
-			"movies": result,
+		c.JSON(http.StatusOK, gin.H{
+			"data": result,
 		})
 	}
 }
@@ -141,6 +156,129 @@ func (h *Handler) DeleteMovie(c *gin.Context) {
 
 }
 
+// ------
+func (h *Handler) APIGetMovies(c *gin.Context) {
+	result, err := h.storage.GetAllMovies()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"data": result,
+		})
+	}
+}
+
+// movies
+func (h *Handler) APIGetAllMovies(c *gin.Context) {
+	result, err := h.storage.GetAllMovies()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"data": result,
+		})
+	}
+}
+
+func (h *Handler) APIGetMovieById(c *gin.Context) {
+	id := c.Params[0].Value
+
+	result, err := h.storage.GetMovieById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"data": result,
+		})
+	}
+}
+
+func (h *Handler) APIPostMovie(c *gin.Context) {
+	var m []types.MovieParams
+
+	err := c.ShouldBind(&m)
+	if err != nil {
+		panic(err)
+	}
+
+	// TODO: verify if director_id exists
+	for _, director := range m {
+		_, err = h.storage.GetDirectorById(director.DirectorID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+				"DirectorID": director.DirectorID,
+			})
+			return
+		}
+	}
+
+	err = h.storage.PostMovie(&m)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Data updated",
+		})
+	}
+}
+
+func (h *Handler) APIUpdateMovie(c *gin.Context) {
+	movieId := c.Params[0].Value
+
+	var m types.MovieParams
+	err := c.ShouldBind(&m)
+	if err != nil {
+		panic(err)
+	}
+
+	// TODO: verify if movie_id exists
+
+	_, err = h.storage.GetDirectorById(m.DirectorID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = h.storage.UpdateMovie(movieId, &m)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Successfully updated",
+		})
+	}
+
+}
+
+func (h *Handler) APIDeleteMovie(c *gin.Context) {
+	movieId := c.Params[0].Value
+
+	err := h.storage.DeleteMovie(movieId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Successfully deleted",
+		})
+	}
+
+}
+
 // directors
 func (h *Handler) GetAllDirectors(c *gin.Context) {
 	result, err := h.storage.GetAllDirectors()
@@ -149,7 +287,7 @@ func (h *Handler) GetAllDirectors(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"data": result,
 		})
 	}
@@ -164,7 +302,7 @@ func (h *Handler) GetDirectorById(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"data": result,
 		})
 	}
@@ -172,7 +310,7 @@ func (h *Handler) GetDirectorById(c *gin.Context) {
 
 func (h *Handler) PostDirector(c *gin.Context) {
 	var d []types.DirectorParams
-
+	
 	err := c.ShouldBind(&d)
 	if err != nil {
 		panic(err)
@@ -180,7 +318,7 @@ func (h *Handler) PostDirector(c *gin.Context) {
 
 	err = h.storage.PostDirector(&d)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"error": err.Error(),
 		})
 	} else {
