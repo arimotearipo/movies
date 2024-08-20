@@ -46,20 +46,20 @@ func (s *Server) Serve() {
 	movies := router.Group("/movies")
 	{
 		movies.GET("/:id", handler.GetMovieById)
-		movies.POST("/add", handler.PostMovie)
+		movies.POST("/", handler.PostMovie)
 		movies.PUT("/:id", handler.UpdateMovie)
 		movies.DELETE("/:id", handler.DeleteMovie)
-		movies.GET("/all", handler.GetAllMovies)
+		movies.GET("/", handler.GetAllMovies)
 	}
 
 
 	directors := router.Group("/directors")
 	{
 		directors.GET("/:id", handler.GetDirectorById)
-		directors.POST("/add", handler.PostDirector)
+		directors.POST("/", handler.PostDirector)
 		directors.PUT("/:id", handler.UpdateDirector)
 		directors.DELETE("/:id", handler.DeleteDirector)
-		directors.GET("/all", handler.GetAllDirectors)
+		directors.GET("/", handler.GetAllDirectors)
 	}
 
 	err := router.Run(s.addr)
