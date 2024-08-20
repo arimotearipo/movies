@@ -5,7 +5,6 @@ import (
 
 	"github.com/arimotearipo/movies/internal/handlers"
 	"github.com/arimotearipo/movies/internal/psqlstorage"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,7 +36,7 @@ func NewServer(addr string, store *psqlstorage.Storage) *Server {
 func (s *Server) Serve() {
 	router := gin.Default()
 
-	router.Use(cors.Default())
+	router.Use(CORSMiddleware())
 
 	handler := handlers.NewHandler(s.store)
 
