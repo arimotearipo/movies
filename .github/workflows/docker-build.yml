@@ -5,6 +5,7 @@ jobs:
   build-tag-push:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Build the docker image
         run: docker build . --file Dockerfile --tag movies:latest
       - name: Login to DockerHub
