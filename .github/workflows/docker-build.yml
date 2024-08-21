@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build the docker image
-        run: docker build -t movies:latest .
+        run: docker build . --file Dockerfile --tag movies:latest
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
