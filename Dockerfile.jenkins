@@ -1,0 +1,17 @@
+FROM jenkins/jenkins:lts
+
+USER root
+
+# Install necessary tools
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg2 \
+    software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+
+# Keep the container running as root for Docker access
+USER root 
