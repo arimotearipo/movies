@@ -1,5 +1,6 @@
 services:
   movieapp:
+    container_name: movieapp
     build: .
     depends_on:
       - postgres
@@ -10,6 +11,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
   postgres:
+    container_name: postgres
     image: postgres:10.14-alpine
     restart: always
     hostname: postgres
@@ -20,6 +22,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
   jenkins:
+    container_name: jenkins
     build:
       context: .
       dockerfile: Dockerfile.jenkins
