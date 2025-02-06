@@ -9,4 +9,4 @@ FROM alpine:latest
 COPY --from=builder /movie_app/movie_app .
 ENTRYPOINT ["./movie_app"]
 LABEL Name=movies Version=0.0.1
-EXPOSE 8080
+EXPOSE 3000
