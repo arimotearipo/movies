@@ -29,7 +29,7 @@ func main() {
 	// Create new instance of Postgres Service layer
 	store := psqlstorage.NewStorage(db.DB)
 
-	port := getEnv("PORT", "8080")
+	port := getEnv("PORT", "3000")
 
 	// Create server using the created Postgres Service layer
 	server := server.NewServer(":"+port, store)
